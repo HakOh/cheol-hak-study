@@ -18,7 +18,11 @@ t_batch = t_train[batch_mask]
 print(np.random.choice(60000, 10))
 
 # cross entropy
+def cross_entropy_error(y, t):
+    delta = 1e - 7 # 아주 작은 값을 더해서 절대 0이 되지 않도록, 마이너스 무한대가 발생하지않게
+    return -np.sum(t * np.log(y + delta))
 
+# one hot encoding
 def cross_entropy_error(y, t):
     if y.ndim == 1:
         t = t.reshape(1, t.size)
@@ -26,3 +30,12 @@ def cross_entropy_error(y, t):
 
     batch_size = y.shape[0]
     return -np.sum(t * np.log(y)) / batch_size
+
+# 정답 레이블
+def cross_entropy_error(y, t):
+    if y.ndim == 1:
+        t = t.reshape(1, t.size)
+        y = y.reshape(1, y.size)
+
+    batch_size = y.shape[0]
+    return -np.sum(np.log(y[np.arange(batch_size), t])) / batch_size

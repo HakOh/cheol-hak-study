@@ -22,10 +22,21 @@
 - 추정값의 확률분포와 참값의 확률분포의 차이
 - $E = -\Sigma_{k}t_{k}\log{y_k}$
 - $t_k$가 원-핫 인코딩이기 때문에 실질적으로는 정답일때의 출력만 계산된다.
+
+
+### 교차엔트로피오차 t가 원-핫 인코딩 일때
 ```python
 def cross_entropy_error(y,t):
   delta = 1e-7
   return -np.sum(t * np.log(y + delta))
+```
+- np.log()함수에 0이 입력되면 마이너스 무한대를 뜻하는 -inf가 되어 더 이상 계산을 못하기 때문에 아주 작은 값인 delta를 더해줘서 절대 0이 되지 않게 한다.
+
+### 교차엔트로피오차 t가 숫자 레이블 일때
+```python
+def cross_entropy_error(y,t):
+  delta = 1e-7
+  return -np.sum(t * np.log(y + delta)[t])
 ```
 
 #### 미니배치
@@ -51,8 +62,38 @@ t_batch = t_train[batch_mask]
 ```
 
 #### 미니배치 vs 배치
-- 배치 : 중복불가
-- 미니배치 : 중복가능(무작위 랜덤 표본 추출)
+- 배치 : 데이터 전체를 여러 개 묶음으로 나누것, 중복불가
+- 미니배치 : 데이터 전체를 일부로 추린 것, 중복가능(무작위 랜덤 표본 추출)
+
+전체 데이터가 60,000 장이라고 했을 때,
+- 배치 : 배치 사이즈가 100 장이라면, 배치 하나당 100장이고 총 배치 개수는 600개
+- 미니배치 : 60,000 장에서 100장만 표본추출한 것
+#### 배치용 교차엔트로피 오차 구현
+
+```python
+def cross_entropy_error(y, t):
+  if y.dim == 1:
+    t = t.reshape(1, t.size)
+    y = y.reshape(1, y.size)
+
+  batch_size = y.shape[0]
+  return -np.sum(t * np.log(y)) / batch_size
+```
+
+```python
+def cross_entropy_error(y, t):
+  if y.dim == 1:
+    t = t.reshape(1, t.size)
+    y = y.reshape(1, y.size)
+
+  batch_size = y.shape[0]
+  return -np.sum(np.log(y[np.arange(batch_size), t])) / batch_size
+```
+
+#### 최적화의 기준으로 정확도가 아니라 손실 함수를 사용하는 이유
+- 최적의 가중치를 찾을 때 정확도보다 손실 함수를 써야 정밀하게 최적화
+왜냐하면 정확도는 손실 함수 값보다 불연속적이기 때문이다.
+불연속적이면 미분값이 0이 되는 곳이 많다는 뜻이고, 미분값이 0이 되면 그만큼 정밀하게 최적화할 수 없다는 뜻이기 때문이다.
 
 
 

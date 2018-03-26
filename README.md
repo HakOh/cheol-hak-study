@@ -1,5 +1,4 @@
-# cheol-hak-study
+# Deep learning study
 
-Basic deeplearning study with JMC
+Basic deeplearning study 
 
-deep learning from scratch
